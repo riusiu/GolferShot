@@ -849,8 +849,8 @@ PlayerSettings:
   apiCompatibilityLevelPerPlatform: {}
   m_RenderingPath: 1
   m_MobileRenderingPath: 1
-  metroPackageName: Golfer Shot
-  metroPackageVersion: 
+  metroPackageName: GolferShot
+  metroPackageVersion: 1.0.0.0
   metroCertificatePath: 
   metroCertificatePassword: 
   metroCertificateSubject: 
@@ -858,7 +858,7 @@ PlayerSettings:
   metroCertificateNotAfter: 0000000000000000
   metroApplicationDescription: Golfer Shot
   wsaImages: {}
-  metroTileShortName: 
+  metroTileShortName: Golfer Shot
   metroTileShowName: 0
   metroMediumTileShowName: 0
   metroLargeTileShowName: 0
