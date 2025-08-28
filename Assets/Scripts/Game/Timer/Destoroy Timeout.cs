@@ -10,7 +10,7 @@ public class DestroyTimeout : MonoBehaviour
     public                   float           countdownTime = 3f;
     public                   TextMeshProUGUI countdownText;
     [SerializeField] private GameObject      BlackScreen;
-    public GameObject TimerBack;
+    public GameObject Timer;
     
     // Start is called before the first frame update
     void Start()
@@ -35,6 +35,6 @@ public class DestroyTimeout : MonoBehaviour
         yield return new WaitForSecondsRealtime(1f);
         Destroy(BlackScreen);
         Destroy(gameObject);
-        TimerBack.SetActive(true);
+        Timer.SetActive(true);
     }
 }

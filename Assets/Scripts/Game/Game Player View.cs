@@ -12,6 +12,7 @@ public class GamePlayerView : MonoBehaviour
         jump,
         stun,
     }
+
     [SerializeField] private SkinnedMeshRenderer _bodyMaterial;
     [SerializeField] private SkinnedMeshRenderer _visorMaterial;
 

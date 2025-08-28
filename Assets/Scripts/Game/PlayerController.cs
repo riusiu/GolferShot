@@ -2,6 +2,7 @@ using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Debug = System.Diagnostics.Debug;
 
 public class PlayerController : MonoBehaviour
 {
@@ -96,6 +97,7 @@ public class PlayerController : MonoBehaviour
     void FixedUpdate()
     {
         // カメラの向きを考慮して移動方向を計算
+        Debug.Assert(Camera.main != null, "Camera.main != null");
         Vector3 cameraForward = Vector3.Scale(Camera.main.transform.forward, new Vector3(1, 0, 1)).normalized;
         Vector3 moveForward = cameraForward * verticalInput + Camera.main.transform.right * horizontalInput;
 
