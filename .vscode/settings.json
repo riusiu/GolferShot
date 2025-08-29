@@ -56,5 +56,6 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "GolferShot.sln"
+    "dotnet.defaultSolution": "GolferShot.sln",
+    "dotnet.preferCSharpExtension": true
 }
