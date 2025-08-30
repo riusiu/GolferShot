@@ -191,6 +191,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player_01
       objectReference: {fileID: 0}
+    - target: {fileID: 3100749606356722778, guid: 7547fac287de7744a8434d66d33187c5,
+        type: 3}
+      propertyPath: m_Name
+      value: Player_01
+      objectReference: {fileID: 0}
     - target: {fileID: 5866666021909216657, guid: 7547fac287de7744a8434d66d33187c5,
         type: 3}
       propertyPath: m_Controller
@@ -225,12 +230,6 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 2886822197147989849}
   m_SourcePrefab: {fileID: 100100000, guid: 7547fac287de7744a8434d66d33187c5, type: 3}
---- !u!95 &1283258401742351106 stripped
-Animator:
-  m_CorrespondingSourceObject: {fileID: 5866666021909216657, guid: 7547fac287de7744a8434d66d33187c5,
-    type: 3}
-  m_PrefabInstance: {fileID: 4658297745275344531}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &5129354110769738104 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 7547fac287de7744a8434d66d33187c5,
@@ -286,15 +285,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e4f7d0743655bd042bae5a5f3d7c1d91, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  walkSpeed: 5
-  _animator: {fileID: 1283258401742351106}
-  groundCheck: {fileID: 0}
-  groundCheckRadius: 0.2
-  groundLayer:
+  moveSpeed: 5
+  rotationSpeed: 10
+  jumpForce: 5
+  groundMask:
     serializedVersion: 2
-    m_Bits: 8
-  onGround: 1
-  _hold: {fileID: 0}
+    m_Bits: 0
+  groundCheckRadius: 0.2
+  groundCheckDistance: 0.3
+  cameraFollowTarget: {fileID: 0}
+  shotPower: 15
+  shotUpwardForce: 0.3
+  rayDistance: 3
+  ballMask:
+    serializedVersion: 2
+    m_Bits: 0
+  loftedClubModel: {fileID: 0}
+  straightClubModel: {fileID: 0}
 --- !u!54 &2955474469407014531
 Rigidbody:
   m_ObjectHideFlags: 0
