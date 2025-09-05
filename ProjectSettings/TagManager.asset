@@ -3,7 +3,22 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - Ball
+  - Taiyaki
+  - FrenchBread
+  - Banana
+  - CarolinaReaper
+  - Apple
+  - WhiteRadish
+  - Cake
+  - Iron
+  - Range
+  - Meat
+  - Fan
+  - Bullfight
+  - Tuna
+  - P
   layers:
   - Default
   - TransparentFX
@@ -12,10 +27,10 @@ TagManager:
   - Water
   - UI
   - object
-  - Player
-  - 
-  - 
-  - 
+  - P1
+  - P2
+  - P3
+  - P4
   - 
   - 
   - 

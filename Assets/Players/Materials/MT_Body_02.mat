@@ -22,7 +22,7 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: MT_Body_02
   m_Shader: {fileID: 4800000, guid: 51b2dee0ab07bd84d8147601ff89e511, type: 3}
-  m_Parent: {fileID: 2100000, guid: 2f26451ab19d91e4ab6b70ba2bbd122a, type: 2}
+  m_Parent: {fileID: 2100000, guid: 92d66128d8cba9141927f4ab312b80a9, type: 2}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
   - _METALLICGLOSSMAP

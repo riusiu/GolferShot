@@ -7,7 +7,7 @@ public partial class StartchangeScene : MonoBehaviour
 {
     public void OnClickStartButton()
     {
-        SceneManager.LoadScene("EntryScene");
+        SceneManager.LoadScene("Entry Scene");
     }
     // Start is called before the first frame update
     void Start()
