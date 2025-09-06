@@ -536,4 +536,18 @@ public class PlayerController : MonoBehaviour
         a.y = 0f; b.y = 0f;                                   // 高さ無視
         return Vector3.Distance(a, b);                        // XZ平面距離
     }
+    
+    // ① フィールド（好きなセクションの末尾でOK）
+    [Header("スコア")]       // ★追加：見出し
+    public int score = 0; // ★現在のスコア
+
+    public System.Action<int,int> OnScored;             // ★(任意)加点通知： (得点, 合計)
+
+// ② メソッド（クラス内のどこでもOK）
+    public void AddScore(int points)                    // ★スコア加点API（HoleGoalから呼ばれる）
+    {
+        score += Mathf.Max(0, points);                         // マイナスは防止（必要なら許可に変えてOK）
+        Debug.Log($"[Score] {name} +{points}点 → 合計 {score}点"); // デバッグ
+        OnScored?.Invoke(points, score);                       // (任意)UI更新などに使えるイベント
+    }
 }

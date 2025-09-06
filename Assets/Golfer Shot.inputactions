@@ -208,6 +208,17 @@
                 },
                 {
                     "name": "",
+                    "id": "8ab46ca4-9d13-4bd5-ac2d-0e06cdc6277e",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Grab",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "e0276f9f-2d6f-42d5-a642-c33c91190a1a",
                     "path": "<Keyboard>/space",
                     "interactions": "",

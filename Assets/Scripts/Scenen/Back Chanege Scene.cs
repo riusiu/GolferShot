@@ -7,7 +7,7 @@ public partial class BackchangeScene : MonoBehaviour
 {
     public void OnClickBackTitle()
     {
-        SceneManager.LoadScene("TitleScene");
+        SceneManager.LoadScene("Title Scene");
     }
     // Start is called before the first frame update
     void Start()

@@ -7,7 +7,7 @@ public partial class CreditchangeScene : MonoBehaviour
 {
     public void OnClickCreditButton()
     {
-        SceneManager.LoadScene("CREDITScene");
+        SceneManager.LoadScene("Credit Scene");
     }
     // Start is called before the first frame update
     void Start()

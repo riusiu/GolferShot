@@ -16,45 +16,60 @@ MonoBehaviour:
   - tag: Ball
     score: 50
     padding: 0.5
+    destroyOnScore: 1
   - tag: Taiyaki
-    score: 50
+    score: 110
     padding: 0.5
+    destroyOnScore: 1
   - tag: FrenchBread
-    score: 50
-    padding: 0.5
-  - tag: Banan
-    score: 50
-    padding: 0.5
-  - tag: CarolinaReaper
-    score: 50
-    padding: 0.5
-  - tag: Apple
     score: 100
     padding: 0.5
-  - tag: WhiteRadish
-    score: 150
-    padding: 0.5
-  - tag: Cake
+    destroyOnScore: 1
+  - tag: Banan
     score: 200
     padding: 0.5
-  - tag: Iron
+    destroyOnScore: 1
+  - tag: CarolinaReaper
+    score: 70
+    padding: 0.5
+    destroyOnScore: 1
+  - tag: Apple
+    score: 90
+    padding: 0.5
+    destroyOnScore: 1
+  - tag: WhiteRadish
     score: 250
     padding: 0.5
-  - tag: Range
-    score: 300
-    padding: 0.5
-  - tag: Meat
+    destroyOnScore: 1
+  - tag: Cake
     score: 350
     padding: 0.5
-  - tag: Fan
-    score: 400
+    destroyOnScore: 1
+  - tag: Iron
+    score: 150
     padding: 0.5
-  - tag: Bullfight
+    destroyOnScore: 1
+  - tag: Range
     score: 450
     padding: 0.5
-  - tag: Tuna
-    score: 500
+    destroyOnScore: 1
+  - tag: Meat
+    score: 400
     padding: 0.5
+    destroyOnScore: 1
+  - tag: Fan
+    score: 300
+    padding: 0.5
+    destroyOnScore: 1
+  - tag: Bullfight
+    score: 550
+    padding: 0.5
+    destroyOnScore: 1
+  - tag: Tuna
+    score: 600
+    padding: 0.5
+    destroyOnScore: 1
   - tag: P
     score: 500
     padding: 0.5
+    destroyOnScore: 1

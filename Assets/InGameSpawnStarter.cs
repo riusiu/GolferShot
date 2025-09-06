@@ -10,13 +10,13 @@ public class InGameSpawnStarter : MonoBehaviour
 
         if (spawner == null)
         {
-            Debug.LogError("❌ spawner が設定されていません！");
+            Debug.Log("❌ spawner が設定されていません！");
             return;
         }
 
         if (PlayerDataStore.Instance == null)
         {
-            Debug.LogError("❌ PlayerDataStore.Instance が null です！");
+            Debug.Log("❌ PlayerDataStore.Instance が null です！");
             return;
         }
 

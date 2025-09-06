@@ -9,9 +9,10 @@ public class TargetTypeCatalog : ScriptableObject
     [System.Serializable]
     public class Entryball
     {
-        public string tag;            // 対象のタグ名（例："Ball"）
-        public int    score   = 0;    // 将来のスコア計算用（今は保持だけ）
-        public float  padding = 0.3f; // めり込み防止の余白（安全半径に加算する値）
+        public string tag;                   // 対象のタグ名（例："Ball"）
+        public int    score          = 0;    // 将来のスコア計算用（今は保持だけ）
+        public float  padding        = 0.3f; // めり込み防止の余白（安全半径に加算する値）
+        public bool   destroyOnScore = true; // ★追加：スコア後に消すかどうか
     }
 
     public Entryball[] entries;                  // 登録エントリの配列
