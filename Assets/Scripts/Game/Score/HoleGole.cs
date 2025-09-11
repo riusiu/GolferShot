@@ -70,10 +70,10 @@ public class HoleGoal : MonoBehaviour
         ownership.hasScored = true;                 // もうスコア済み
 
         // オブジェクト破棄（設定に応じて）
-        if (doDestroy)
-        {
-            Destroy(root.gameObject);               // 当たったオブジェクトを削除
-        }
+        // //if (doDestroy)
+        // {
+        //     Destroy(root.gameObject);               // 当たったオブジェクトを削除
+        // }
 
         // デバッグ表示
         Debug.Log($"[HoleGoal] {shooter.name} が {tagName} で +{points} 点");
