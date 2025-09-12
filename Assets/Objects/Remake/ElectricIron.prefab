@@ -11,17 +11,17 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: baadce280245ad04cb2370f08142ad49,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 1.75
+      value: -0.01930046
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: baadce280245ad04cb2370f08142ad49,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.05035436
+      value: -2.7601027
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: baadce280245ad04cb2370f08142ad49,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 6.3
+      value: -7.8331404
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: baadce280245ad04cb2370f08142ad49,
         type: 3}
@@ -58,10 +58,50 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -4675351000485540479, guid: baadce280245ad04cb2370f08142ad49,
+        type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: -1952653997093974558, guid: baadce280245ad04cb2370f08142ad49,
+        type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: baadce280245ad04cb2370f08142ad49,
         type: 3}
       propertyPath: m_Name
       value: ElectricIron
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: baadce280245ad04cb2370f08142ad49,
+        type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: baadce280245ad04cb2370f08142ad49,
+        type: 3}
+      propertyPath: m_TagString
+      value: Iron
+      objectReference: {fileID: 0}
+    - target: {fileID: 1772033922330607853, guid: baadce280245ad04cb2370f08142ad49,
+        type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 5413956155161258270, guid: baadce280245ad04cb2370f08142ad49,
+        type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 7167506595066464862, guid: baadce280245ad04cb2370f08142ad49,
+        type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 8450668129397365219, guid: baadce280245ad04cb2370f08142ad49,
+        type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -75,6 +115,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 1754380074246176896}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: baadce280245ad04cb2370f08142ad49,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8676494807344534131}
   m_SourcePrefab: {fileID: 100100000, guid: baadce280245ad04cb2370f08142ad49, type: 3}
 --- !u!1 &6904220570591268959 stripped
 GameObject:
@@ -130,3 +174,21 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.4072628, y: 0.38258567, z: 0.69496346}
   m_Center: {x: -0.0023212433, y: 0.17864393, z: -0.012176514}
+--- !u!114 &8676494807344534131
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6904220570591268959}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 58333b54c4aed4e46b559f19a7b6e881, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  respawnPrefab: {fileID: 6904220570591268959}
+  spawnPointOverride: {fileID: 0}
+  useCurrentAsFallback: 1
+  respawnOnDestroy: 0
+  respawnDelaySeconds: 2
+  allowTeleportRecover: 0

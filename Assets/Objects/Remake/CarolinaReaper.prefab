@@ -11,17 +11,17 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: a0e9b4fea8560f748b2e867bd29dec89,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 1.15
+      value: -12.9193
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a0e9b4fea8560f748b2e867bd29dec89,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.145
+      value: -2.480457
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a0e9b4fea8560f748b2e867bd29dec89,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 6.069
+      value: -17.87314
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a0e9b4fea8560f748b2e867bd29dec89,
         type: 3}
@@ -63,6 +63,16 @@ PrefabInstance:
       propertyPath: m_Name
       value: CarolinaReaper
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: a0e9b4fea8560f748b2e867bd29dec89,
+        type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: a0e9b4fea8560f748b2e867bd29dec89,
+        type: 3}
+      propertyPath: m_TagString
+      value: CarolinaReaper
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -75,6 +85,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 600192348765816519}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: a0e9b4fea8560f748b2e867bd29dec89,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 242268014267391896}
   m_SourcePrefab: {fileID: 100100000, guid: a0e9b4fea8560f748b2e867bd29dec89, type: 3}
 --- !u!1 &7047288994585979173 stripped
 GameObject:
@@ -128,7 +142,25 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.3112592
-  m_Height: 0.6994332
+  m_Radius: 0.32618642
+  m_Height: 0.65237284
   m_Direction: 1
-  m_Center: {x: 0.000000074505806, y: 0.00028339028, z: -0.03384929}
+  m_Center: {x: 0.000000059604645, y: 0.023813605, z: -0.01892209}
+--- !u!114 &242268014267391896
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7047288994585979173}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 58333b54c4aed4e46b559f19a7b6e881, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  respawnPrefab: {fileID: 7047288994585979173}
+  spawnPointOverride: {fileID: 0}
+  useCurrentAsFallback: 1
+  respawnOnDestroy: 0
+  respawnDelaySeconds: 2
+  allowTeleportRecover: 0
