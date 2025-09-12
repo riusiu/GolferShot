@@ -22,9 +22,11 @@ public class PlayerController : MonoBehaviour
     public Transform cameraFollowTarget;                // カメラ基準の向き（※プレイヤーの腰付近の空オブジェクト推奨）
 
     [Header("ゴルフショット")]
-    public float shotPower = 15f;                       // ショットのパワー（Impulse）
-    public float shotUpwardForce = 0.3f;                // 山なり用の上向き成分
-    public LayerMask ballMask;                          // ボール用レイヤー（※現行は検出では未使用。将来のフィルタ等で流用可）
+    public float shotPower = 15f;            // ショットのパワー（Impulse）
+    public float     shotUpwardForce = 0.3f; // 山なり用の上向き成分
+    public LayerMask ballMask;               // ボール用レイヤー（※現行は検出では未使用。将来のフィルタ等で流用可）
+    public AudioClip shotswing;
+    AudioSource audioSource;
 
     [Header("クラブ表示")]
     public GameObject loftedClubModel;                  // 山なりクラブの見た目
@@ -99,6 +101,7 @@ public class PlayerController : MonoBehaviour
         rb = GetComponent<Rigidbody>();                 // Rigidbody取得
         animator = GetComponent<Animator>();            // Animator取得
         playerInput = GetComponent<PlayerInput>();      // PlayerInput取得
+        audioSource = GetComponent<AudioSource>();      //AudioSourceを取得
 
         moveAction  = playerInput.actions["Move"];      // Move参照
         jumpAction  = playerInput.actions["Jump"];      // Jump参照
@@ -160,6 +163,7 @@ public class PlayerController : MonoBehaviour
             isShooting = true;                          // スイングフラグON（移動ロック継続）
             animator.SetTrigger("shot");                // Shotアニメを開始（Animatorに"shot"トリガーを用意）
             RefreshClubVisual();                        // 表示継続（isShooting=trueのため表示維持）
+            audioSource.PlayOneShot(shotswing);
 
             // ★変更：ここではカメラを戻さない（ぶれ防止）→ ショット終端で戻す
         }
