@@ -26,17 +26,17 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: a6470b5df50f02b46b01376abc93ebad,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -1.43
+      value: -9.189301
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a6470b5df50f02b46b01376abc93ebad,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.05035436
+      value: -2.7601027
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a6470b5df50f02b46b01376abc93ebad,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 5.66
+      value: -20.11314
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a6470b5df50f02b46b01376abc93ebad,
         type: 3}
@@ -83,6 +83,16 @@ PrefabInstance:
       propertyPath: m_Name
       value: FrenchBread
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: a6470b5df50f02b46b01376abc93ebad,
+        type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: a6470b5df50f02b46b01376abc93ebad,
+        type: 3}
+      propertyPath: m_TagString
+      value: FrenchBread
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -95,6 +105,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 1761092480397866641}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: a6470b5df50f02b46b01376abc93ebad,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1627545599439653840}
   m_SourcePrefab: {fileID: 100100000, guid: a6470b5df50f02b46b01376abc93ebad, type: 3}
 --- !u!1 &2320518511945402303 stripped
 GameObject:
@@ -150,3 +164,21 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.08651099, y: 0.05683925, z: 0.50038713}
   m_Center: {x: 0, y: 0.024935115, z: 0.0029179826}
+--- !u!114 &1627545599439653840
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2320518511945402303}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 58333b54c4aed4e46b559f19a7b6e881, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  respawnPrefab: {fileID: 2320518511945402303}
+  spawnPointOverride: {fileID: 0}
+  useCurrentAsFallback: 1
+  respawnOnDestroy: 0
+  respawnDelaySeconds: 2
+  allowTeleportRecover: 0
