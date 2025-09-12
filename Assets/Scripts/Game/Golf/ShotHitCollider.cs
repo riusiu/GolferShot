@@ -36,9 +36,10 @@ public class ShotHitCollider : MonoBehaviour
         // 2) Rigidbody を取得（親についている場合にも対応）
         Rigidbody rb = other.attachedRigidbody;      // 親階層にRigidbodyがあっても拾える
         if (rb == null) return;                      // 無ければ飛ばせないので終了
-        
+
         //AudioSourceを取得
-        audioSource = rb.GetComponent<AudioSource>();
+        // audioSource = rb.GetComponent<AudioSource>();
+        var sePlayer = other.gameObject.GetComponent<SePlayer>();
 
         // 3) 発射方向（プレイヤーの左）を算出
         //    ・左 = -right。高さは別途Upwardで付与するので水平成分に限定
@@ -68,7 +69,8 @@ public class ShotHitCollider : MonoBehaviour
 
         // 8) インパルスを付与して発射！
         rb.AddForce(shotDir * power, ForceMode.Impulse); // 力を一気に加える（瞬発）
-        audioSource.PlayOneShot(hitObject); //AudioSourceを再生
+                                                         // audioSource.PlayOneShot(hitObject); //AudioSourceを再生
+        sePlayer.PlaySe();
 
         // 9) デバッグ（向き確認用の赤いライン）
         Debug.Log($"[ShotHitCollider] Shoot LEFT / Target={rb.name} / Mode={(isLofted ? "Lofted" : "Straight")} / Power={power} / Up={up}");

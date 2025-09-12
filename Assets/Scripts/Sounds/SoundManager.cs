@@ -20,6 +20,7 @@ public class SoundManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
+            seAudioSource = GetComponent<AudioSource>();
         }
         else
         {
@@ -30,7 +31,7 @@ public class SoundManager : MonoBehaviour
     public void PlayBGM(BGMSoundData.BGM bgm)
     {
         BGMSoundData data = bgmSoundDatas.Find(data => data.bgm == bgm);
-        bgmAudioSource.clip   = data.audioClip;
+        bgmAudioSource.clip = data.audioClip;
         bgmAudioSource.volume = data.volume * bgmMasterVolume * masterVolume;
         bgmAudioSource.Play();
     }
@@ -47,8 +48,11 @@ public class SoundManager : MonoBehaviour
     public void PlaySE(SESoundData.SE se, Vector3 position)
     {
         SESoundData data = seSoundDatas.Find(data => data.se == se);
-        seAudioSource.volume = data.volume * seMasterVolume * masterVolume;
-        AudioSource.PlayClipAtPoint(data.audioClip, position);
+        // seAudioSource.volume = data.volume * seMasterVolume * masterVolume;
+        seAudioSource.volume = 1.0f;
+        seAudioSource.clip = data.audioClip;
+        seAudioSource.Play();
+        // AudioSource.PlayClipAtPoint(data.audioClip, position);
     }
 }
 

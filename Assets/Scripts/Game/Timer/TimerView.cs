@@ -7,7 +7,7 @@ public class TimerView : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI _text;  // 画面に表示するテキスト参照（mm:ss 表示）
 
-    private float _timer = 3f * 60f;                 // 残りタイマー（初期値：3分=180秒）
+    [SerializeField] private float _timer = 3f * 60f;                 // 残りタイマー（初期値：3分=180秒）
 
     private System.Action _endCallback;              // タイムアップ時に呼びたい任意のコールバック（外部用）
 
