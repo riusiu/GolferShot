@@ -139,7 +139,7 @@ public class PlayerController : MonoBehaviour
         //構え開始：Shotを押し始めた瞬間（長押し中に維持）
         if (shotAction.IsPressed() && !isAiming && !isShooting) // まだ構えておらず、スイング中でもない
         {
-            // ★変更：近くにターゲットが無い場合は構え自体を禁止（ぐるぐる防止＆ワープ防止）
+            // 近くにターゲットが無い場合は構え自体を禁止（ぐるぐる防止＆ワープ防止）
             if (!CanEnterAim())                                   // ★追加
             {
                 return;                                           // 構えに入らない
@@ -147,6 +147,8 @@ public class PlayerController : MonoBehaviour
 
             isAiming = true;                            // 構えフラグON
             animator.SetBool("form", true);             // formアニメON（あなたのパラメ名に合わせて"form"）
+            // ★追加：ゲージ開始（このプレイヤーを渡す）
+            if (PowerGaugeUI.Instance) PowerGaugeUI.Instance.Begin(this);
             RefreshClubVisual();                        // クラブ表示（構え中ON）
 
             EnterAimMode();                             
@@ -159,6 +161,8 @@ public class PlayerController : MonoBehaviour
             animator.SetBool("form", false);            // formをOFF（遷移）
             isShooting = true;                          // スイングフラグON（移動ロック継続）
             animator.SetTrigger("shot");                // Shotアニメを開始（Animatorに"shot"トリガーを用意）
+            // ★追加：ゲージ確定→倍率をShotPowerBufferへ保存
+            if (PowerGaugeUI.Instance) PowerGaugeUI.Instance.Commit(this);
             RefreshClubVisual();                        // 表示継続（isShooting=trueのため表示維持）
         }
 
@@ -178,7 +182,7 @@ public class PlayerController : MonoBehaviour
             RefreshClubVisual();                       // 構え/スイング中なら見た目即時反映
         }
 
-        // ★追加：構え中の「周回制御」（最寄りターゲットの周りを回りつつ距離維持・180°制限）
+        // 構え中の「周回制御」（最寄りターゲットの周りを回りつつ距離維持・180°制限）
         if (isAiming)
         {
             AimOrbitUpdate();                          // ターゲット周回の見せ方（★ワープ防止対応済み）

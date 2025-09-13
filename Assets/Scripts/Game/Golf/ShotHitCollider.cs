@@ -22,6 +22,11 @@ public class ShotHitCollider : MonoBehaviour
     public float loftedPower    = 15f;               // 山なりショットの強さ
     public float loftedUpward   = 0.3f;              // 山なり用の上向き補正
 
+    [Header("ゲージ倍率")]
+    public bool usePowerGauge = true;                // ★追加：パワーゲージを使うか
+    public float minMultiplier = 0.3f;               // ★追加：ゲージ0での倍率（例：30%）
+    public float maxMultiplier = 1.2f;               // ★追加：ゲージ1での倍率（例：120%）
+
     [Header("共通")]
     public float extraSpinDampen = 1f;               // 発射前の回転をどのくらい抑えるか（=1で完全0に）
 
@@ -35,7 +40,6 @@ public class ShotHitCollider : MonoBehaviour
         if (rb == null) return;                      // 無ければ飛ばせないので終了
 
         // 3) 発射方向（プレイヤーの左）を算出
-        //    ・左 = -right。高さは別途Upwardで付与するので水平成分に限定
         Vector3 left = owner ? -owner.transform.right : -transform.right; // プレイヤー基準の左（保険で自分の左）
         left.y = 0f;                                   // 高さ成分を消す（水平のみ）
         if (left.sqrMagnitude < 0.0001f)               // 万一ゼロになったときの保険
@@ -44,8 +48,13 @@ public class ShotHitCollider : MonoBehaviour
 
         // 4) ショット種別（Lofted / Straight）でパワー・上向き補正を決定
         bool isLofted = owner != null && owner.IsLofted(); // 現在Loftedか？
-        float power   = isLofted ? loftedPower  : straightPower;   // パワー
-        float up      = isLofted ? loftedUpward : straightUpward;  // 上向き補正
+        float basePower   = isLofted ? loftedPower  : straightPower;   // ベースパワー
+        float up          = isLofted ? loftedUpward : straightUpward;  // 上向き補正
+
+        // ★追加：ゲージ倍率（0..1）を取得して 係数(min→max) に写像
+        float scale01 = usePowerGauge ? ShotPowerBuffer.Get(owner, 1f, clearAfterGet:true) : 1f;
+        float powerMul = usePowerGauge ? Mathf.Lerp(minMultiplier, maxMultiplier, scale01) : 1f;
+        float power    = basePower * powerMul;                           // 最終パワー
 
         // 5) 事前状態のリセット（回転・速度）
         rb.velocity = Vector3.zero;                   // 直前の移動速度をリセット
@@ -64,7 +73,7 @@ public class ShotHitCollider : MonoBehaviour
         rb.AddForce(shotDir * power, ForceMode.Impulse); // 力を一気に加える（瞬発）
 
         // 9) デバッグ（向き確認用の赤いライン）
-        Debug.Log($"[ShotHitCollider] Shoot LEFT / Target={rb.name} / Mode={(isLofted ? "Lofted" : "Straight")} / Power={power} / Up={up}");
+        Debug.Log($"[ShotHitCollider] Shoot LEFT / Target={rb.name} / Mode={(isLofted ? "Lofted" : "Straight")} / Base={basePower} x Mul={powerMul:F2} (g={scale01:F2})");
         Debug.DrawRay(other.transform.position, shotDir * power, Color.red, 1.5f); // 可視化
     }
 

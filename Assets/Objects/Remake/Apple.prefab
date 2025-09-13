@@ -11,17 +11,17 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 3f1948c492965d947969d80b063f1951,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -11.814301
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 3f1948c492965d947969d80b063f1951,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: -2.775457
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 3f1948c492965d947969d80b063f1951,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -17.88314
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 3f1948c492965d947969d80b063f1951,
         type: 3}
@@ -157,8 +157,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   respawnPrefab: {fileID: 5090838524680930658}
-  spawnPointOverride: {fileID: 0}
-  useCurrentAsFallback: 1
   respawnOnDestroy: 0
   respawnDelaySeconds: 2
+  spawnPointOverride: {fileID: 0}
+  useCurrentAsFallback: 1
+  pointsGroup: {fileID: 0}
+  area: {fileID: 0}
+  clearanceRadius: 0.25
+  sampleTries: 12
   allowTeleportRecover: 0

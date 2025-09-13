@@ -10174,7 +10174,7 @@ AnimationClip:
   m_HasMotionFloatCurves: 0
   m_Events:
   - time: 2.9333334
-    functionName: OnShotEndAction
+    functionName: AnimEvent_FormEnd
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
