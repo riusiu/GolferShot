@@ -38,7 +38,8 @@ public class ShotHitCollider : MonoBehaviour
         if (rb == null) return;                      // 無ければ飛ばせないので終了
         
         //AudioSourceを取得
-        audioSource = rb.GetComponent<AudioSource>();
+        //audioSource = rb.GetComponent<AudioSource>();
+        var SE = rb.GetComponent<SePlayer>();
 
         // 3) 発射方向（プレイヤーの左）を算出
         //    ・左 = -right。高さは別途Upwardで付与するので水平成分に限定
@@ -68,7 +69,8 @@ public class ShotHitCollider : MonoBehaviour
 
         // 8) インパルスを付与して発射！
         rb.AddForce(shotDir * power, ForceMode.Impulse); // 力を一気に加える（瞬発）
-        audioSource.PlayOneShot(hitObject); //AudioSourceを再生
+        //audioSource.PlayOneShot(hitObject); //AudioSourceを再生
+        SE.PlaySe();
 
         // 9) デバッグ（向き確認用の赤いライン）
         Debug.Log($"[ShotHitCollider] Shoot LEFT / Target={rb.name} / Mode={(isLofted ? "Lofted" : "Straight")} / Power={power} / Up={up}");
