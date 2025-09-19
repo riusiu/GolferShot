@@ -3,7 +3,16 @@ guid: e4f7d0743655bd042bae5a5f3d7c1d91
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - groundCheckPoint: {instanceID: 0}
+  - cameraFollowTarget: {instanceID: 0}
+  - shotswing: {instanceID: 0}
+  - loftedClubModel: {instanceID: 0}
+  - straightClubModel: {instanceID: 0}
+  - shotHitCollider: {instanceID: 0}
+  - freeLook: {instanceID: 0}
+  - aimVCam: {instanceID: 0}
+  - aimDetector: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

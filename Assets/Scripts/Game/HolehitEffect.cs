@@ -16,9 +16,7 @@ public class HolehitEffect : MonoBehaviour
             newParticle.transform.position = this.transform.position;
             // パーティクルを発生させる。
             newParticle.Play();
-            // インスタンス化したパーティクルシステムのGameObjectを5秒後に削除する。(任意)
-            // ※第一引数をnewParticleだけにするとコンポーネントしか削除されない。
-            Destroy(newParticle.gameObject, 5.0f);
+           
         }
 
         if (other.gameObject.CompareTag("Taiyaki"))
@@ -26,7 +24,6 @@ public class HolehitEffect : MonoBehaviour
             ParticleSystem newParticle = Instantiate(particle);
             newParticle.transform.position = this.transform.position;
             newParticle.Play();
-            Destroy(newParticle.gameObject, 5.0f);
         }
 
         if (other.gameObject.CompareTag("FrenchBread"))
@@ -34,7 +31,6 @@ public class HolehitEffect : MonoBehaviour
             ParticleSystem newParticle = Instantiate(particle);
             newParticle.transform.position = this.transform.position;
             newParticle.Play();
-            Destroy(newParticle.gameObject, 5.0f);
         }
 
         if (other.gameObject.CompareTag("Banana"))
@@ -42,7 +38,6 @@ public class HolehitEffect : MonoBehaviour
             ParticleSystem newParticle = Instantiate(particle);
             newParticle.transform.position = this.transform.position;
             newParticle.Play();
-            Destroy(newParticle.gameObject, 5.0f);
         }
 
         if (other.gameObject.CompareTag("CarolinaReaper"))
@@ -50,7 +45,6 @@ public class HolehitEffect : MonoBehaviour
             ParticleSystem newParticle = Instantiate(particle);
             newParticle.transform.position = this.transform.position;
             newParticle.Play();
-            Destroy(newParticle.gameObject, 5.0f);
         }
 
         if (other.gameObject.CompareTag("Apple"))
@@ -58,7 +52,6 @@ public class HolehitEffect : MonoBehaviour
             ParticleSystem newParticle = Instantiate(particle);
             newParticle.transform.position = this.transform.position;
             newParticle.Play();
-            Destroy(newParticle.gameObject, 5.0f);
         }
 
         if (other.gameObject.CompareTag("WhiteRadish"))
@@ -66,7 +59,6 @@ public class HolehitEffect : MonoBehaviour
             ParticleSystem newParticle = Instantiate(particle);
             newParticle.transform.position = this.transform.position;
             newParticle.Play();
-            Destroy(newParticle.gameObject, 5.0f);
         }
 
         if (other.gameObject.CompareTag("Cake"))
@@ -74,7 +66,6 @@ public class HolehitEffect : MonoBehaviour
             ParticleSystem newParticle = Instantiate(particle);
             newParticle.transform.position = this.transform.position;
             newParticle.Play();
-            Destroy(newParticle.gameObject, 5.0f);
         }
 
         if (other.gameObject.CompareTag("Iron"))
@@ -82,7 +73,6 @@ public class HolehitEffect : MonoBehaviour
             ParticleSystem newParticle = Instantiate(particle);
             newParticle.transform.position = this.transform.position;
             newParticle.Play();
-            Destroy(newParticle.gameObject, 5.0f);
         }
 
         if (other.gameObject.CompareTag("Range"))
@@ -90,7 +80,6 @@ public class HolehitEffect : MonoBehaviour
             ParticleSystem newParticle = Instantiate(particle);
             newParticle.transform.position = this.transform.position;
             newParticle.Play();
-            Destroy(newParticle.gameObject, 5.0f);
         }
 
         if (other.gameObject.CompareTag("Meat"))
@@ -98,7 +87,6 @@ public class HolehitEffect : MonoBehaviour
             ParticleSystem newParticle = Instantiate(particle);
             newParticle.transform.position = this.transform.position;
             newParticle.Play();
-            Destroy(newParticle.gameObject, 5.0f);
         }
 
         if (other.gameObject.CompareTag("Fan"))
@@ -106,7 +94,6 @@ public class HolehitEffect : MonoBehaviour
             ParticleSystem newParticle = Instantiate(particle);
             newParticle.transform.position = this.transform.position;
             newParticle.Play();
-            Destroy(newParticle.gameObject, 5.0f);
         }
 
         if (other.gameObject.CompareTag("Bullfight"))
@@ -114,7 +101,6 @@ public class HolehitEffect : MonoBehaviour
             ParticleSystem newParticle = Instantiate(particle);
             newParticle.transform.position = this.transform.position;
             newParticle.Play();
-            Destroy(newParticle.gameObject, 5.0f);
         }
 
         if (other.gameObject.CompareTag("Tuna"))
@@ -122,7 +108,6 @@ public class HolehitEffect : MonoBehaviour
             ParticleSystem newParticle = Instantiate(particle);
             newParticle.transform.position = this.transform.position;
             newParticle.Play();
-            Destroy(newParticle.gameObject, 5.0f);
         }
     }
    

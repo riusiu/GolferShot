@@ -76,7 +76,8 @@ public class SESoundData
         Dead,
         ItemGet,
         Goal,
-        CAVEAT,// これがラベルになる
+        Swing,
+        Hit,// これがラベルになる
     }
 
     public SE        se;

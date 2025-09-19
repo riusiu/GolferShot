@@ -88,9 +88,9 @@ public class PlayerController : MonoBehaviour
     private Transform currentAimTarget;                 // ★追加：構え中に周回する“ターゲット”
 
     // ★追加：オービット制御（180°制限のため）
-    private bool   aimHasBaseline = false;              // ★追加：基準ベクトルを確定済みか
-    private Vector3 aimBaseDirFlat;                     // ★追加：基準ベクトル（ターゲット→プレイヤーの水平）
-    private float  aimOffsetDeg = 0f;                   // ★追加：基準からの現在オフセット角（-half〜+half）
+    private bool   aimHasBaseline = false;              // ：基準ベクトルを確定済みか
+    private Vector3 aimBaseDirFlat;                     // ：基準ベクトル（ターゲット→プレイヤーの水平）
+    private float  aimOffsetDeg = 0f;                   // ：基準からの現在オフセット角（-half〜+half）
 
     // グラブ種類
     public enum ShotType { Lofted, Straight }           // 山なり / 直線
