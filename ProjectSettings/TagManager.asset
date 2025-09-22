@@ -19,8 +19,6 @@ TagManager:
   - Bullfight
   - Tuna
   - P
-  - FoxUdon
-  - Purine
   layers:
   - Default
   - TransparentFX
@@ -28,7 +26,7 @@ TagManager:
   - Ground
   - Water
   - UI
-  - Ball
+  - object
   - P1
   - P2
   - P3

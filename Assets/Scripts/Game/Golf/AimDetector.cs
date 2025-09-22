@@ -79,7 +79,6 @@ public class AimDetector : MonoBehaviour
 
     private void SelectNearestAndComputeRadius()                   // 最寄りの対象と半径を更新
     {
-        candidates.RemoveWhere(c => c == null);
         float bestSqr = float.PositiveInfinity;                    // 最短距離（自乗）初期化
         Transform bestT = null;                                    // ベストターゲット
         float bestRadius = minOrbitRadius;                         // ベスト半径

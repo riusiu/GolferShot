@@ -1,37 +1,21 @@
-using UnityEngine;                                  // Unityの基本機能
+using UnityEngine;                                // Unityの基本機能
 
 /// <summary>
-/// 「このオブジェクトを最後に打ったプレイヤー」を覚えておく超小物。
-/// ・ShotHitCollider が SetShooter(...) で記録
-/// ・HoleGoal が GetShooter() で取得してスコア加算
-/// ・Destroyされても問題ない（必要ならまた打たれた時に付与/上書きされる）
+/// 「このオブジェクトを最後に打ったプレイヤー」を記録する小さなマーカー。
+/// ・ShotHitCollider がヒットさせた瞬間に SetShooter(...) を呼ぶ
+/// ・HoleGoal は LastShooter を見て得点者を決定する
+/// ・二重加点防止のため hasScored を持つ
 /// </summary>
 public class ShotOwnership : MonoBehaviour
 {
-    // 内部に保持する参照（最後に打った PlayerController）
-    [SerializeField] private PlayerController _lastShooter;   // 最後に打った人（インスペクタで確認用にSerialize）
+    public PlayerController lastShooter;       // ★最後に打ったプレイヤー（加点者）
+    public float            lastShotTime;      // ★打った時刻（任意：デバッグ/ルール用）
+    public bool             hasScored = false; // ★もうスコア済みか（多重加点防止）
 
-    /// <summary>
-    /// 誰が打ったかを記録する（ShotHitCollider から呼ばれる）
-    /// </summary>
-    public void SetShooter(PlayerController shooter)          // shooter=打ったプレイヤー
+    public void SetShooter(PlayerController shooter) // ★打った人を記録する
     {
-        _lastShooter = shooter;                               // 参照を保存（nullになることもある）
-    }
-
-    /// <summary>
-    /// 最後に打ったプレイヤーを取得する（HoleGoal から呼ばれる）
-    /// </summary>
-    public PlayerController GetShooter()                      // 誰が打ったかを返す
-    {
-        return _lastShooter;                                  // 参照をそのまま返す（nullなら未記録）
-    }
-
-    /// <summary>
-    /// 所有情報を消す（必要に応じて呼ぶ。通常は不要）
-    /// </summary>
-    public void ClearShooter()                                // 記録をリセット
-    {
-        _lastShooter = null;                                  // 参照を消す
+        lastShooter  = shooter;   // 記録：プレイヤー参照
+        lastShotTime = Time.time; // 記録：ゲーム内時刻
+        hasScored    = false;     // 新規ショットなのでスコア済みフラグを解除
     }
 }

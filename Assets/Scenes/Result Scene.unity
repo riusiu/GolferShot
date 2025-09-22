@@ -886,7 +886,7 @@ MonoBehaviour:
   - {fileID: 1152524042}
   - {fileID: 1270326919}
   lookAtTarget: {fileID: 1209873949}
-  faceSpotForwardIfNoLookAt: 1
+  faceSpotForwardIfNoLookAt: 0
   triggerWin: Win
   triggerPlace: Place
   rankingText: {fileID: 0}
