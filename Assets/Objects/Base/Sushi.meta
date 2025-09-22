@@ -1,7 +1,12 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Objects/Base/Sushi.meta
 guid: 86fef1aaec908fa46aa73caaa8db98b3
 folderAsset: yes
 DefaultImporter:
+========
+guid: c30d26510f357774c89338ed81d9d126
+PrefabImporter:
+>>>>>>>> parent of 753944b (パワーゲージの追加、オブジェクトの追加):Assets/Objects/Remake/Cake.prefab.meta
   externalObjects: {}
   userData: 
   assetBundleName: 
