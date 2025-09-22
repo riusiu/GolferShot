@@ -1,13 +1,13 @@
-using UnityEngine;                                      // Unityの基本機能
-using UnityEngine.InputSystem;                          // 新Input System
-using Cinemachine;                                      // カメラ参照（Transformのみ使用）
+using UnityEngine;                                      
+using UnityEngine.InputSystem;                          
+using Cinemachine;                                      
 
-[RequireComponent(typeof(Rigidbody))]                   // Rigidbody必須
-[RequireComponent(typeof(Animator))]                    // Animator必須
+[RequireComponent(typeof(Rigidbody))]                   
+[RequireComponent(typeof(Animator))]                    
 public class PlayerController : MonoBehaviour
 {
     [Header("移動設定")]
-    public float moveSpeed = 5f;                        // 地上移動速度
+    public float moveSpeed = 5f;                        // 移動速度
     public float rotationSpeed = 10f;                   // 見た目の回転速度
 
     [Header("ジャンプ設定")]
@@ -32,8 +32,7 @@ public class PlayerController : MonoBehaviour
 
     [Header("ショット用コライダー")]                   // インパクト用コライダー（瞬間ON）
     public GameObject shotHitCollider;                  // インパクト時に一瞬出す
-
-    // ===== ここからAiming改良 用の追加項目 =====
+    
     [Header("Aiming（構え中）設定")]                   // 構え体験のチューニング
     public float orbitTurnSpeed = 120f;                 // 構え中にターゲットの周りを回る角速度（度/秒）
     public float orbitDistance = 2.0f;                  // 周回時に維持したい半径（AimDetectorから更新される）
@@ -140,7 +139,7 @@ public class PlayerController : MonoBehaviour
         if (shotAction.IsPressed() && !isAiming && !isShooting) // まだ構えておらず、スイング中でもない
         {
             // 近くにターゲットが無い場合は構え自体を禁止（ぐるぐる防止＆ワープ防止）
-            if (!CanEnterAim())                                   // ★追加
+            if (!CanEnterAim())                                   
             {
                 return;                                           // 構えに入らない
             }

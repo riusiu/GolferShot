@@ -1,45 +1,61 @@
 using UnityEngine;                                  // Unityの基本機能
+using System.Collections.Generic;                   // 辞書用
 
 /// <summary>
-/// ステージ外（奈落）などに置くトリガー領域。
-/// ・触れた物体にRespawnableがあれば、Destroy復活 or テレポート復帰を行う。
-/// ・プレイヤーはテレポート、オブジェクトはDestroy復活…のように使い分け可能。
+/// ステージ外などに置く「落下処理」専用トリガー。
+/// ・Destroy→Respawn は必ず「予約→Destroy」の順で安全に実行
+/// ・TeleportRecoverNow() も選択可（Destroyしない）
+/// ・同一オブジェクトの連続ヒットを短時間無視して二重実行を防止
 /// </summary>
-[RequireComponent(typeof(Collider))]                 // 必ずColliderが必要
+[RequireComponent(typeof(Collider))]                 // 必ずコライダーが必要
 public class KillZone : MonoBehaviour
 {
+    public enum Mode { DestroyAndRespawn, TeleportRecover } // 動作モード
+
     [Header("動作モード")]
-    public bool destroyAndRespawn = true;            // true=Destroy→復活 / false=テレポート復帰（Respawnable設定に従う）
+    public Mode mode = Mode.DestroyAndRespawn;       // 既定は Destroy→Respawn
 
     [Header("適用レイヤー")]
-    public LayerMask targetLayers = ~0;              // このレイヤーに含まれる物だけ対象
+    public LayerMask targetLayers = ~0;              // 対象レイヤーのみ処理
+
+    [Header("二重発火の抑制")]
+    public float cooldownSeconds = 0.15f;            // 同じ物が短時間で再入したら無視
+
+    // 内部：最後に処理した時刻（ID→時刻）
+    private readonly Dictionary<int, float> _lastHitTime = new Dictionary<int, float>();
 
     void Awake()
     {
-        var col = GetComponent<Collider>(); // 自身のコライダー取得
-        col.isTrigger = true;               // 触れたら発火したいのでTriggerに
+        var col = GetComponent<Collider>();          // 自分のコライダー
+        col.isTrigger = true;                        // Trigger にする
     }
 
     void OnTriggerEnter(Collider other)
     {
-        // ▼レイヤーフィルタ：対象外なら何もしない
-        if (((1 << other.gameObject.layer) & targetLayers) == 0) return; // レイヤー不一致
+        // レイヤーフィルタ
+        if (((1 << other.gameObject.layer) & targetLayers) == 0) return;
 
-        // ▼Rigidbodyが付いている一番上のTransformを取得（箱→親にRigidbodyがあるケース）
-        Transform root = other.attachedRigidbody ? other.attachedRigidbody.transform : other.transform; // ルート
+        // ルートTransform（Rigidbody優先）
+        Transform root = other.attachedRigidbody ? other.attachedRigidbody.transform : other.transform;
+        int id = root.GetInstanceID();               // 一意ID
 
-        // ▼Respawnableが付いているか確認（付いていない物はノータッチ）
-        var resp = root.GetComponent<Respawnable>(); // 復活設定の有無
-        if (resp == null) return;                    // 無ければ何もしない（安全）
+        // 二重発火防止：クールダウン中は無視
+        if (_lastHitTime.TryGetValue(id, out float last) && Time.time - last < cooldownSeconds) return;
+        _lastHitTime[id] = Time.time;                // 今の時刻を記録
 
-        if (destroyAndRespawn)                       // Destroy→復活させたい場合
+        // 対象のRespawnableを取得（無ければ何もしない）
+        var resp = root.GetComponent<Respawnable>();
+        if (resp == null) return;                    // 設定が無い物はスルー
+
+        // モードに応じて処理
+        if (mode == Mode.DestroyAndRespawn)
         {
-            // Destroy時のOnDestroyで自動予約されますが、「確実に予約してから消す」版で安全に
-            resp.ScheduleRespawnThenDestroy();       // 予約してから破棄
+            resp.ScheduleRespawnThenDestroy();       // 予約→Destroy（安全）
+            return;                                   // Destroy後に触らない
         }
-        else                                         // テレポート復帰（Destroyしない）
+        else // TeleportRecover
         {
-            resp.TeleportRecoverNow();               // その場で復帰（プレイヤーに推奨）
+            resp.TeleportRecoverNow();               // その場で復帰（プレイヤーなどに）
         }
     }
 }

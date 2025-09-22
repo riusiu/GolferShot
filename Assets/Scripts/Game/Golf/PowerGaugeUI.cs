@@ -161,3 +161,4 @@ public class PowerGaugeUI : MonoBehaviour
         if (!show) gameObject.SetActive(false);
     }
 }
+

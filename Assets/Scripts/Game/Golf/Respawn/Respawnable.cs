@@ -1,137 +1,115 @@
 using UnityEngine;                                  // Unityの基本機能
 
 /// <summary>
-/// Destroy（または明示呼び出し）で「安全に復活」させるためのコンポーネント。
-/// - respawnPrefab は Project上のPrefabに限定（シーン実体を弾く）
-/// - Editor で自動補完（Prefabインスタンスなら、自分の元Prefabを自動セット）
-/// - ランダムスポーン：ポイント群 or エリア（Box/Sphere）から復活座標をサンプリング
-/// - Destroy後の参照アクセス事故を防ぐため、予約→即return が基本
+/// Destroy されたら安全にリスポーンさせるための最小コンポーネント（ポイント方式専用）。
+/// ・respawnPrefab は Project の Prefab 必須（シーン実体NG）
+/// ・spawnPointOverride > pointsGroup > Awake位置 の順で復帰地点を決定
+/// ・ScheduleRespawnThenDestroy() を使うと「予約→Destroy」で安全
 /// </summary>
 public class Respawnable : MonoBehaviour
 {
-    [Header("復活対象（Project上のPrefabを指定）")]
-    public GameObject respawnPrefab;                // ★ProjectのPrefabを割り当て（シーン実体は不可）
+    [Header("復活対象（ProjectのPrefab）")]
+    public GameObject respawnPrefab;                // 復活時に生成するPrefab（必ず Project 上のPrefabを割当）
 
     [Header("復活遅延")]
-    public bool respawnOnDestroy = true;            // Destroy時に自動復活するか
-    public float respawnDelaySeconds = 2f;          // 復活までの遅延
+    public bool  respawnOnDestroy     = true;       // Destroy時に自動復活するか
+    public float respawnDelaySeconds  = 1.0f;       // 復活までの待機秒
 
-    [Header("固定スポーン（指定があれば最優先）")]
-    public Transform spawnPointOverride;            // 指定時はここに復活
-    public bool useCurrentAsFallback = true;        // 指定なし時：Awakeの位置/回転を使う
+    [Header("スポーンポイント（優先: Override → Group）")]
+    public Transform          spawnPointOverride;   // ここがあれば必ずここに出す
+    public RandomSpawnPoints  pointsGroup;          // 複数候補からランダム（物理的な空き判定付き）
 
-    [Header("ランダムスポーン設定")]
-    public RandomSpawnPoints pointsGroup;           // 複数ポイントからランダム
-    public RandomSpawnArea   area;                  // エリア（Box/Sphere）からランダム
-    public float clearanceRadius = 0.25f;           // 近接クリアランス（衝突しない半径）
-    public int sampleTries = 12;                    // サンプリング試行回数（失敗時はフォールバック）
+    [Header("フォールバック")]
+    public bool useCurrentAsFallback = true;        // どちらも無ければ Awake の座標に戻る
 
-    [Header("テレポート復帰（プレイヤー用）")]
-    public bool allowTeleportRecover = true;        // Destroyせず戻す選択肢
+    // 内部：Awake 時点の座標を保存（フォールバック用）
+    private Vector3   _fallbackPos;                 // 位置
+    private Quaternion _fallbackRot;                // 回転
 
-    // 内部：フォールバック座標
-    private Vector3 _fallbackPos;
-    private Quaternion _fallbackRot;
-
-    void Awake()
+    void Awake()                                     // 起動時に1回だけ呼ばれる
     {
-        _fallbackPos = transform.position;          // 起動時の位置を保存
-        _fallbackRot = transform.rotation;          // 起動時の回転を保存
+        _fallbackPos = transform.position;           // 位置を保存
+        _fallbackRot = transform.rotation;           // 回転を保存
     }
 
-    void OnDestroy()
+    void OnDestroy()                                  // このオブジェクトが破棄された時
     {
-        if (!Application.isPlaying) return;         // 再生外では無視
-        if (!respawnOnDestroy) return;              // 自動復活しない設定
-        if (respawnPrefab == null) return;          // そもそも未設定
+        if (!Application.isPlaying) return;          // 再生外は無視
+        if (!respawnOnDestroy) return;               // 自動復活しない設定なら何もしない
+        if (respawnPrefab == null) return;           // Prefab 未設定なら復活不能
 
-        // ★安全：シーン実体が紛れないようガード
-        if (respawnPrefab.scene.IsValid())
+        // ★安全：respawnPrefab がシーン実体なら中止（Editorで気づけるようログ）
+        if (respawnPrefab.scene.IsValid())           
         {
-            Debug.LogError($"[Respawnable] respawnPrefab にシーン実体が割り当てられています。ProjectのPrefabを指定してください。({respawnPrefab.name})", this);
-            return;
+            Debug.LogError($"[Respawnable] respawnPrefab にシーン実体が割り当てられています。Project の Prefab を指定してください。({respawnPrefab.name})", this);
+            return;                                   // 予約しない
         }
 
-        // 復活座標を決定（固定 → ランダムポイント → ランダムエリア → フォールバック）
-        Pose pose = GetRespawnPose();
+        // 復活座標を決定
+        Pose pose = GetRespawnPose();                 // 位置と回転のペア
 
-        // ★予約して終わり（Destroy後に自分や関連参照を触らない）
+        // 復活を予約（遅延後に Instantiate）。Destroy 後に自分へ触らないのが鉄則。
         RespawnManager.Instance.ScheduleRespawn(respawnPrefab, pose.position, pose.rotation, respawnDelaySeconds);
     }
 
-    /// <summary>Destroyせず瞬時に元へ戻す（プレイヤー向け）</summary>
+    /// <summary>Destroy せず元の地点へ瞬時に戻す（プレイヤー用の保険）。</summary>
     public void TeleportRecoverNow()
     {
-        if (!allowTeleportRecover) return;
-        Pose p = GetRespawnPose();
-        var rb = GetComponent<Rigidbody>();
+        Pose p = GetRespawnPose();                    // 復帰先を決定
+        var rb = GetComponent<Rigidbody>();           // 物理があれば速度を止める
         if (rb) { rb.velocity = Vector3.zero; rb.angularVelocity = Vector3.zero; }
-        transform.SetPositionAndRotation(p.position, p.rotation);
+        transform.SetPositionAndRotation(p.position, p.rotation); // 位置・回転を即反映
     }
 
-    /// <summary>安全版：先に予約→それからDestroy。以降は参照を使わない。</summary>
+    /// <summary>安全版：先に復活予約→そのあと自分をDestroy。</summary>
     public void ScheduleRespawnThenDestroy(float? delayOverride = null)
     {
-        if (respawnPrefab != null && !respawnPrefab.scene.IsValid())
+        if (respawnPrefab != null && !respawnPrefab.scene.IsValid()) // Project Prefab だけ許可
         {
-            Pose p = GetRespawnPose();
-            float d = delayOverride.HasValue ? delayOverride.Value : respawnDelaySeconds;
-            RespawnManager.Instance.ScheduleRespawn(respawnPrefab, p.position, p.rotation, d);
+            Pose p = GetRespawnPose();               // 復活座標
+            float delay = delayOverride ?? respawnDelaySeconds; // 遅延秒
+            RespawnManager.Instance.ScheduleRespawn(respawnPrefab, p.position, p.rotation, delay); // 予約
         }
-        Destroy(gameObject);                         // 破棄（以降、この参照を触らない）
+        Destroy(gameObject);                         // それから安全に破棄（以降、この参照を触らない）
     }
 
-    // ===== ここからユーティリティ =====
-
+    // ===== 復活座標の決定ロジック（簡潔） =====
     private Pose GetRespawnPose()
     {
-        // 1) 固定スポーンがあれば最優先
-        if (spawnPointOverride != null)
+        if (spawnPointOverride != null)               // 1) 明示のポイント
             return new Pose(spawnPointOverride.position, spawnPointOverride.rotation);
 
-        // 2) ランダムポイント群
-        if (pointsGroup != null && pointsGroup.HasPoints())
-        {
-            if (pointsGroup.TryGetRandomPose(out var p, clearanceRadius))
-                return p;
-        }
+        if (pointsGroup != null && pointsGroup.TryGetRandomPose(out var p, 0.25f)) // 2) ポイント群からランダム
+            return p;
 
-        // 3) エリアからサンプル
-        if (area != null)
-        {
-            if (area.TrySample(out var p, clearanceRadius, sampleTries))
-                return p;
-        }
-
-        // 4) フォールバック（Awake時）
-        if (useCurrentAsFallback)
+        if (useCurrentAsFallback)                     // 3) フォールバック（Awake時）
             return new Pose(_fallbackPos, _fallbackRot);
 
-        // 5) 最終手段：現状
-        return new Pose(transform.position, transform.rotation);
+        return new Pose(transform.position, transform.rotation); // 4) 最終手段：現状
     }
 
 #if UNITY_EDITOR
-    // ★Editorだけ：設定の自動補完とガード
-    void OnValidate()
+    void OnValidate()                                  // エディタで値変更時に呼ばれる
     {
-        // シーン実体ガード
+        // シーン実体が入ったら無効化して注意喚起
         if (respawnPrefab != null && respawnPrefab.scene.IsValid())
         {
-            Debug.LogError($"[Respawnable] respawnPrefab にシーン実体が割り当てられています。Project の Prefab を指定してください。({respawnPrefab.name})", this);
-            respawnPrefab = null;
+            Debug.LogError($"[Respawnable] respawnPrefab には必ず Project の Prefab を割り当ててください。({respawnPrefab.name})", this);
+            respawnPrefab = null;                     // 消して事故防止
         }
 
-        // 自動補完：Prefabインスタンスなら「元Prefab」を自動割当
+        // Prefab インスタンスに貼った場合は「元Prefab」を自動で補完
+#if UNITY_EDITOR
         if (respawnPrefab == null)
         {
             var prefab = UnityEditor.PrefabUtility.GetCorrespondingObjectFromOriginalSource(gameObject);
             if (prefab != null && !prefab.scene.IsValid())
             {
-                respawnPrefab = prefab;                                 // 元Prefabをセット
-                UnityEditor.EditorUtility.SetDirty(this);               // 変更を保存
+                respawnPrefab = prefab;               // 元Prefabを自動設定
+                UnityEditor.EditorUtility.SetDirty(this); // 変更を保存
             }
         }
+#endif
     }
 #endif
 }
