@@ -1,73 +1,81 @@
-using UnityEngine;                                  // Unityの基本機能
+using UnityEngine;                                // Unityの基本機能
 
 /// <summary>
-/// ホール到達時の処理（Destroy は絶対にしない）
-/// ・ShotOwnership から打ったプレイヤーを特定してスコア加算
-/// ・同じオブジェクトの二重加点を防止
-/// ・KillZone はホールの「さらに下」に置く運用
+/// 「ホール」。Trigger にしておき、ショットされたオブジェクトが入ると：
+/// 1) ShotOwnership から「打った人」を特定
+/// 2) TargetTypeCatalog（Entryball）から点数等を取得して加点
+/// 3) 設定に応じてオブジェクトを破棄
 /// </summary>
-[RequireComponent(typeof(Collider))]                 // 必ずトリガーコライダーを付ける
+[RequireComponent(typeof(Collider))]               // ★Trigger コライダーが必須
 public class HoleGoal : MonoBehaviour
 {
-    [Header("スコア定義（タグ→点数）")]
-    public TargetTypeCatalog catalog;                // 既存のカタログ（Entryball）を使用
-    public int defaultScore = 1;                     // カタログ未登録の時の点数
+    [Header("参照")]
+    public TargetTypeCatalog targetCatalog;        // ★既存のカタログを使用
 
-    [Header("適用レイヤー")]
-    public LayerMask targetLayers = ~0;              // これに含まれるレイヤーのみ有効
+    [Header("受け付け設定")]
+    public LayerMask acceptLayers = ~0;            // ★受け付けるレイヤー（任意で絞る）
 
-    [Header("二重加点防止")]
-    public float sameObjectCooldown = 1.0f;          // 同じオブジェクトが連続で入った時の冷却秒
+    [Header("フォールバック")]
+    public int  defaultPoints = 1;                 // ★Entryballにpointsが無い/見つからない場合のスコア
+    public bool defaultDestroyOnScore = true;      // ★EntryballにdestroyOnScoreが無い場合の既定
 
-    // 内部：最近スコア化したオブジェクトの時刻を記録（ID→時刻）
-    private readonly System.Collections.Generic.Dictionary<int, float> _lastScoredTime
-        = new System.Collections.Generic.Dictionary<int, float>();
+    private Collider _col;                         // 自身のコライダー参照
 
     void Awake()
     {
-        var col = GetComponent<Collider>();          // 自分のコライダー取得
-        col.isTrigger = true;                        // トリガーにする
+        _col = GetComponent<Collider>();           // コライダー取得
+        _col.isTrigger = true;                     // 必ず Trigger にする
     }
 
-    void OnTriggerEnter(Collider other)              // 何かが入った
+    void OnTriggerEnter(Collider other)            // ★何かが入った
     {
-        // レイヤーフィルタ
-        if (((1 << other.gameObject.layer) & targetLayers) == 0) return; // 対象外
+        // レイヤーフィルタ（不要なら受け付ける）
+        if (((1 << other.gameObject.layer) & acceptLayers) == 0)
+            return;                                // レイヤー対象外
 
-        // ルート（Rigidbody基準）を確定
+        // ルート取得（Rigidbodyがあればそちらを優先）
         Transform root = other.attachedRigidbody ? other.attachedRigidbody.transform : other.transform;
 
-        // 二重加点防止：直近でスコアにしていればスキップ
-        int id = root.GetInstanceID();               // 一意のID
-        if (_lastScoredTime.TryGetValue(id, out float t) && Time.time - t < sameObjectCooldown)
-            return;                                  // 冷却中
+        // 「誰が打ったか」の情報を取り出し（無ければスコア不可）
+        var ownership = root.GetComponent<ShotOwnership>(); // ShotOwnership を探す
+        if (ownership == null) return;              // ショットされていない（=自然落下など）は無効
+        if (ownership.hasScored) return;            // 既に加点済みなら無視（多重防止）
 
-        _lastScoredTime[id] = Time.time;             // 記録を更新
+        // 得点者の特定（無ければ無効）
+        var shooter = ownership.lastShooter;        // 最後に打ったプレイヤー
+        if (shooter == null) return;                // 誰にも属していない＝無効
 
-        // 誰の得点か：ShotOwnership から最後に打ったプレイヤーを取得
-        var own = root.GetComponent<ShotOwnership>(); // 所有情報
-        var shooter = own ? own.GetShooter() : null;  // PlayerController 参照
+        // タグから点数・破棄可否を決定（TargetTypeCatalog を使用）
+        string tagName = root.gameObject.tag;       // ターゲットのタグ
 
-        // 点数を決める：タグ→カタログ、無ければdefault
-        string tagName = root.tag;                   // 対象のタグ
-        int add = defaultScore;                      // 初期値
-        if (catalog != null)                         // カタログがあれば
+        int points = defaultPoints;                 // 既定スコア
+        bool doDestroy = defaultDestroyOnScore;     // 既定の破棄可否
+
+        if (targetCatalog != null)
         {
-            var e = catalog.Get(tagName);            // 該当エントリ（Entryball想定）
-            if (e != null) add = Mathf.Max(0, e.score); // 負数は防止
+            var entry = targetCatalog.Get(tagName); // ★あなたのカタログAPI（前回までと同じ）
+            if (entry != null)
+            {
+                // ▼項目名が "points" でない場合（例: "score"）は下の行を書き換えてください
+                points = entry.score;              // ← ここを entry.score; にしてもOK（プロジェクトの命名に合わせる）
+                // ▼destroyOnScore を Entryball に用意していない場合はフォールバック値が使われます
+                try { doDestroy = entry.destroyOnScore; } catch { /* 無ければ既定 */ }
+            }
         }
 
-        // スコア加算（PlayerControllerにscoreがある前提。無ければ適宜合わせてください）
-        if (shooter != null)
-        {
-            shooter.score += add;                    // 直接加算（AddScore関数があるならそちらで）
-            Debug.Log($"[HoleGoal] +{add} to {shooter.name} by {tagName}");
-        }
-        else
-        {
-            Debug.Log($"[HoleGoal] +{add} (no shooter) by {tagName}");
-        }
+        // プレイヤーへ加点
+        shooter.AddScore(points);                   // ★PlayerController の AddScore(int) を呼ぶ
 
-        // 重要：ここで Destroy はしない。落下して下の KillZone が処理する想定。
+        // 多重防止フラグ
+        ownership.hasScored = true;                 // もうスコア済み
+
+        // オブジェクト破棄（設定に応じて）
+        // //if (doDestroy)
+        // {
+        //     Destroy(root.gameObject);               // 当たったオブジェクトを削除
+        // }
+
+        // デバッグ表示
+        Debug.Log($"[HoleGoal] {shooter.name} が {tagName} で +{points} 点");
     }
 }
