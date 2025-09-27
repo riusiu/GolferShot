@@ -11,17 +11,17 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 3f1948c492965d947969d80b063f1951,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 1.2967358
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 3f1948c492965d947969d80b063f1951,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: -0.0053572655
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 3f1948c492965d947969d80b063f1951,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: 12.59588
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 3f1948c492965d947969d80b063f1951,
         type: 3}
@@ -156,7 +156,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 58333b54c4aed4e46b559f19a7b6e881, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  respawnPrefab: {fileID: 5090838524680930658}
+  respawnPrefab: {fileID: 6631772119774737114, guid: 7b7aa0530f56f1643aa79ebce797b2cd,
+    type: 3}
   respawnOnDestroy: 0
   respawnDelaySeconds: 2
   spawnPointOverride: {fileID: 0}

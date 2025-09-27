@@ -19,6 +19,9 @@ TagManager:
   - Bullfight
   - Tuna
   - P
+  - Purin
+  - FoxUdon
+  - Sushi
   layers:
   - Default
   - TransparentFX
@@ -32,7 +35,7 @@ TagManager:
   - P3
   - P4
   - Player
-  - 
+  - AimOnly
   - 
   - 
   - 

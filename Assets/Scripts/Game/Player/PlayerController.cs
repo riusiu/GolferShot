@@ -1,6 +1,7 @@
 using UnityEngine;                                      // Unityの基本機能
 using UnityEngine.InputSystem;                          // 新Input System
 using Cinemachine;                                      // カメラ参照（Transformのみ使用）
+using System.Collections;                                // ★追加：コルーチン用
 
 [RequireComponent(typeof(Rigidbody))]                   // Rigidbody必須
 [RequireComponent(typeof(Animator))]                    // Animator必須
@@ -30,39 +31,58 @@ public class PlayerController : MonoBehaviour
     public GameObject loftedClubModel;                  // 山なりクラブの見た目
     public GameObject straightClubModel;                // 直線クラブの見た目
 
-    [Header("ショット用コライダー")]                   // インパクト用コライダー（瞬間ON）
+    [Header("ショット用コライダー")]                   // ★追加：インパクト用コライダー（瞬間ON）
     public GameObject shotHitCollider;                  // インパクト時に一瞬出す
 
-    // ===== ここからAiming改良 用の追加項目 =====
-    [Header("Aiming（構え中）設定")]                   // 構え体験のチューニング
-    public float orbitTurnSpeed = 120f;                 // 構え中にターゲットの周りを回る角速度（度/秒）
-    public float orbitDistance = 2.0f;                  // 周回時に維持したい半径（AimDetectorから更新される）
-    public float orbitHalfSpanDeg = 90f;                // 周回の片側角（合計180°）
-    public float aimEnterMaxDistance = 4f;              // 構えに入るための最大距離（これより遠い対象では構え不可）
-    public bool  orbitOnlyPushOut = true;               // 近すぎる時だけ外へ押し出す／遠い時は引き寄せない（ワープ防止）
+    // ===== Aiming改良 =====
+    [Header("Aiming（構え中）設定")]                   // ★追加：構え体験のチューニング
+    public float orbitTurnSpeed = 120f;                 // ★追加：構え中にターゲットの周りを回る角速度（度/秒）
+    public float orbitDistance = 2.0f;                  // ★追加：周回時に維持したい半径（ロック時距離を代入）
+    public float orbitHalfSpanDeg = 90f;                // ★追加：周回の片側角（合計180°）
+    public float aimEnterMaxDistance = 4f;              // ★追加：構え開始の許容最大距離
+    public float aimEnterMinClearance = 0.2f;           // ★追加：ターゲット安全半径に対する追加マージン（押し出し無し）
 
-    [Header("Cinemachine（カメラ切替）")]              // FreeLook→右肩VCamへ切替
-    public CinemachineFreeLook freeLook;                // 通常TPS用
-    public CinemachineVirtualCamera aimVCam;            // 構え中に使う「右肩越し」VCam
-    public bool useAimVCam = true;                      // 構え中はこのVCamを使う
+    [Header("Cinemachine（カメラ切替）")]              // ★追加：FreeLook→右肩VCamへ切替
+    public CinemachineFreeLook freeLook;                // ★追加：通常TPS用
+    public CinemachineVirtualCamera aimVCam;            // ★追加：構え中に使う「右肩越し」VCam
+    public bool useAimVCam = true;                      // ★追加：構え中はこのVCamを使う
 
-    [Header("右肩VCamの見え方")]                        // 右肩量など
-    public float aimRightOffset = 0.6f;                 // 右肩オフセット（+x）
-    public float aimUpOffset    = 1.4f;                 // 高さオフセット（+y）
-    public float aimBackDistance = 3.5f;                // 後方距離（背後）
-    public float aimCameraSide   = 1f;                  // 3rdPersonFollow の CameraSide（1=右肩）
+    [Header("右肩VCamの見え方")]
+    public float aimRightOffset = 0.6f;                 // ★追加：右肩オフセット（+x）
+    public float aimUpOffset    = 1.4f;                 // ★追加：高さオフセット（+y）
+    public float aimBackDistance = 3.5f;                // ★追加：後方距離（背後）
+    public float aimCameraSide   = 1f;                  // ★追加：3rdPersonFollow の CameraSide（1=右肩）
 
-    [Header("カメラ切替の優先度")]                      // 確実な切替のため固定値で管理
-    public int freeLookPriorityPlay = 100;              // 通常時FreeLookを上位に
-    public int aimVCamPriorityAim   = 200;              // 構え時aimVCamを最上位に
-    public int priorityInactive     = 10;               // 非アクティブ側はこの低優先度へ
+    [Header("カメラ切替の優先度")]
+    public int freeLookPriorityPlay = 100;              // ★追加：通常時FreeLookを上位に
+    public int aimVCamPriorityAim   = 200;              // ★追加：構え時aimVCamを最上位に
+    public int priorityInactive     = 10;               // ★追加：非アクティブ側はこの低優先度へ
 
-    [Header("カメラ安定化（ショット）")]                // ぶれ対策
-    public bool holdAimUntilShotEnd = true;             // ショット完了までAimVCamを保持
-    public float postShotHoldSeconds = 0.2f;            // ショット後少しだけ保持してから戻す
+    [Header("カメラ安定化（ショット）")]
+    public bool holdAimUntilShotEnd = true;             // ★追加：ショット完了までAimVCamを保持
+    public float postShotHoldSeconds = 0.2f;            // ★追加：ショット後少しだけ保持してから戻す
+    public float postShotReacquireCooldown = 0.25f;     // ★追加：ショット後の再取得禁止時間（ワープ防止）
 
-    [Header("検出連携")]                                 // ターゲット未検出なら構え禁止
-    public AimDetector aimDetector;                     // 常時検出トリガー
+    [Header("検出連携")]
+    public AimDetector aimDetector;                     // ★変更：検出はAimDetectorに集約（ロックを使用）
+
+    // ===== UI（パワーゲージ） =====
+    [Header("UI（パワーゲージ）")]                     // ★追加：各プレイヤー専用ゲージ
+    public PowerGaugeUI powerGauge;                     // ★追加：このプレイヤー専用のゲージUI（Instanceは使わない）
+    public float powerMulMin = 0.5f;                    // ★追加：ゲージ最小時の倍率
+    public float powerMulMax = 1.5f;                    // ★追加：ゲージ最大時の倍率
+
+    // ===== スコア（昔の形に復元） =====
+    [Header("スコア")]       // 見出し
+    public int score = 0; // 現在のスコア
+    public System.Action<int,int> OnScored;             // (得点, 合計)
+
+    public void AddScore(int points)                    // （HoleGoalから呼ばれる）
+    {
+        score += Mathf.Max(0, points);                         // マイナスは防止（必要なら許可に変えてOK）
+        Debug.Log($"[Score] {name} +{points}点 → 合計 {score}点"); // デバッグ
+        OnScored?.Invoke(points, score);                       //UI更新などに使えるイベント
+    }
 
     // 内部参照
     private Rigidbody rb;                               // 自身のRigidbody
@@ -82,17 +102,24 @@ public class PlayerController : MonoBehaviour
     private bool isAiming = false;                      // 構え中（formアニメ中も含む）
     private bool isShooting = false;                    // スイング中（Shotアニメ中）
 
-    // ★追加：Aiming用の状態
-    private Transform currentAimTarget;                 // 構え中に周回する“ターゲット”
+    // ★追加：外部ロック（カウントダウン等で一時的に行動禁止）
+    private bool externalLock = false;                  // ★追加：外部からのロック状態
 
-    // ★追加：オービット制御（180°制限のため）
-    private bool   aimHasBaseline = false;              // 基準ベクトルを確定済みか
-    private Vector3 aimBaseDirFlat;                     // 基準ベクトル（ターゲット→プレイヤーの水平）
-    private float  aimOffsetDeg = 0f;                   // 基準からの現在オフセット角（-half〜+half）
+    // Aiming用
+    private Transform currentAimTarget;                 // ★追加：構え中に周回する“ターゲット”
+    private bool   aimHasBaseline = false;              // ★追加：基準ベクトル確定済みか
+    private Vector3 aimBaseDirFlat;                     // ★追加：基準ベクトル（ターゲット→プレイヤーの水平）
+    private float  aimOffsetDeg = 0f;                   // ★追加：基準からの現在オフセット角（-half〜+half）
 
     // グラブ種類
     public enum ShotType { Lofted, Straight }           // 山なり / 直線
     private ShotType currentShotType = ShotType.Lofted; // 現在の種類
+
+    // ★追加：ゲージ値の保持（0..1）
+    private float lastGauge01 = 0.5f;                   // ★追加：直近のパワーゲージ値
+    public float CurrentGauge01 => lastGauge01;         // ★追加：外部参照用
+    public float GetPowerMultiplier()                   // ★追加：現在の倍率を返す（他スクリプトからも利用可）
+        => Mathf.Lerp(powerMulMin, powerMulMax, lastGauge01);
 
     void Awake()
     {
@@ -107,23 +134,22 @@ public class PlayerController : MonoBehaviour
 
         HideAllClubsAtStart();                          // 開始時はクラブを非表示（移動中は見えない仕様）
 
-        // ★追加：VCamのFollow/LookAtが未設定なら保険的に設定する
+        // VCamのFollow/LookAtが未設定なら保険的に設定する
         if (cameraFollowTarget != null)
         {
             if (freeLook != null)
             {
-                if (freeLook.Follow == null) freeLook.Follow = cameraFollowTarget;
-                if (freeLook.LookAt == null) freeLook.LookAt = cameraFollowTarget;
+                if (freeLook.Follow == null) freeLook.Follow = cameraFollowTarget;   // ★追加
+                if (freeLook.LookAt == null) freeLook.LookAt = cameraFollowTarget;   // ★追加
             }
             if (aimVCam != null)
             {
-                if (aimVCam.Follow == null) aimVCam.Follow = cameraFollowTarget;
-                if (aimVCam.LookAt == null) aimVCam.LookAt = cameraFollowTarget;
+                if (aimVCam.Follow == null) aimVCam.Follow = cameraFollowTarget;     // ★追加
+                if (aimVCam.LookAt == null) aimVCam.LookAt = cameraFollowTarget;     // ★追加
             }
         }
 
-        // ★追加：起動時の優先度を明示（FreeLook優先）
-        ApplyCameraPriority(aiming:false);              // FreeLook=上位 / aimVCam=下位
+        ApplyCameraPriority(aiming:false);              // 起動時：FreeLook=上位 / aimVCam=下位
         ConfigureAimVCam();                             // 右肩オフセット適用
     }
 
@@ -136,57 +162,71 @@ public class PlayerController : MonoBehaviour
         animator.SetFloat("speed", speedPercent);       // アニメ用速度
         animator.SetBool("IsGrounded", isGrounded);     // アニメ用接地
 
-        //構え開始：Shotを押し始めた瞬間（長押し中に維持）
-        if (shotAction.IsPressed() && !isAiming && !isShooting) // まだ構えておらず、スイング中でもない
+        // 構え開始：Shotを押し始めた瞬間（長押し中に維持）
+        if (shotAction.IsPressed() && !isAiming && !isShooting && !IsActionLocked()) // ★変更：外部ロック中は不可
         {
-            // 近くにターゲットが無い場合は構え自体を禁止（ぐるぐる防止＆ワープ防止）
-            if (!CanEnterAim())                                   // ★追加
+            if (aimDetector == null) return;            // ★追加：検出器必須
+
+            // ★追加：自分（プレイヤー）の水平半径を自動計算
+            float myRadius = ComputeMyHorizontalRadius();    // ★追加
+
+            // ★変更：AimDetectorに自分の半径も渡してロック判定（足りなければ構え拒否＝押し出し無し）
+            if (!aimDetector.TryLockTarget(aimEnterMaxDistance, aimEnterMinClearance, myRadius))
             {
-                return;                                           // 構えに入らない
+                return;                                 // ★追加：構えに入らない
             }
 
+            // ★追加：ロック対象と固定半径（=ロック時距離）を使用
+            currentAimTarget = aimDetector.LockedTarget;               // ★追加：固定ターゲット
+            orbitDistance    = Mathf.Max(0.01f, aimDetector.LockedDistanceXZ); // ★追加：固定半径
+
             isAiming = true;                            // 構えフラグON
-            animator.SetBool("form", true);             // formアニメON（あなたのパラメ名に合わせて"form"）
-            // ★追加：ゲージ開始（このプレイヤーを渡す）
-            if (PowerGaugeUI.Instance) PowerGaugeUI.Instance.Begin(this);
+            animator.SetBool("form", true);             // formアニメON
             RefreshClubVisual();                        // クラブ表示（構え中ON）
 
-            EnterAimMode();                             
+            EnterAimMode();                             // 構え突入（カメラ切替）
+
+            // ★追加：このプレイヤー専用のゲージ表示を開始
+            if (powerGauge) powerGauge.Begin(0f);       // 0 からスタート
         }
 
-        //構え終了→スイング開始：Shotを離した瞬間 
-        if (isAiming && shotAction.WasReleasedThisFrame()) // 構え中に指を離した
+        // 構え終了→スイング開始：Shotを離した瞬間 
+        if (isAiming && shotAction.WasReleasedThisFrame())
         {
-            isAiming = false;                           // 構えフラグOFF（formアニメは終了方向へ）
-            animator.SetBool("form", false);            // formをOFF（遷移）
-            isShooting = true;                          // スイングフラグON（移動ロック継続）
-            animator.SetTrigger("shot");                // Shotアニメを開始（Animatorに"shot"トリガーを用意）
-            // ★追加：ゲージ確定→倍率をShotPowerBufferへ保存
-            if (PowerGaugeUI.Instance) PowerGaugeUI.Instance.Commit(this);
-            RefreshClubVisual();                        // 表示継続（isShooting=trueのため表示維持）
+            isAiming = false;                           // 構えフラグOFF
+            animator.SetBool("form", false);            // formをOFF
+            isShooting = true;                          // スイングフラグON
+            animator.SetTrigger("shot");                // Shotアニメ開始
+            RefreshClubVisual();                        // 見た目維持
+
+            // ★追加：ゲージを確定し、倍率を保持（0..1）
+            lastGauge01 = powerGauge ? powerGauge.EndAndGet() : 0.5f;
+            // ※ 実際の加速は ShotHitCollider 側で owner.GetPowerMultiplier() を掛ければ連動します
         }
 
-        //ジャンプ（構え/スイング中は不可）
-        if (jumpAction.triggered && isGrounded && canJump && !IsActionLocked()) // ロック中でない
+        // 構え中：ターゲット周回（180°制限、押し出し無し／固定半径）
+        if (isAiming)
+        {
+            AimOrbitUpdate();                           // ターゲット周回
+        }
+
+        // ジャンプ（構え/スイング中は不可）
+        if (jumpAction.triggered && isGrounded && canJump && !IsActionLocked())
         {
             DoJump();                                   // 実ジャンプ
         }
 
-        //グラブ切替（L1/R1：交互トグル）
-        if (switchShotTypeAction.triggered)            // 押された瞬間
+        // グラブ切替（L1/R1：交互トグル）
+        // ★変更：構え中（isAiming）は切替OK。スイング中（isShooting）と外部ロック（externalLock）時のみ不可。
+        if (switchShotTypeAction.triggered && !isShooting && !externalLock)
         {
-            currentShotType =                          // 山なり↔直線
+            currentShotType =
                 (currentShotType == ShotType.Lofted) ? ShotType.Straight : ShotType.Lofted;
 
             Debug.Log("グラブ切替: " + currentShotType);
-            RefreshClubVisual();                       // 構え/スイング中なら見た目即時反映
+            RefreshClubVisual();    // 構え中でも見た目が即時反映される
         }
 
-        // 構え中の「周回制御」（最寄りターゲットの周りを回りつつ距離維持・180°制限）
-        if (isAiming)
-        {
-            AimOrbitUpdate();                          // ターゲット周回の見せ方（★ワープ防止対応済み）
-        }
     }
 
     void FixedUpdate()
@@ -196,7 +236,7 @@ public class PlayerController : MonoBehaviour
 
     private void Move()
     {
-        if (IsActionLocked())                          // 構え中 or スイング中は移動不可
+        if (IsActionLocked())                          // 構え or スイング中 or 外部ロックは移動不可
         {
             rb.velocity = new Vector3(0f, rb.velocity.y, 0f); // 水平速度を止める
             return;                                    // 以降の移動処理はしない
@@ -270,10 +310,11 @@ public class PlayerController : MonoBehaviour
 
     public void AnimEvent_ShotFire()                         // 発射タイミング
     {
-        StartCoroutine(ActivateShotColliderMomentarily());   // ★追加：一瞬だけコライダーをON
+        // ★変更：ショットは「ヒット用コライダー」を一瞬だけONにして処理
+        StartCoroutine(ActivateShotColliderMomentarily());   // 一瞬だけコライダーをON
     }
 
-    private System.Collections.IEnumerator ActivateShotColliderMomentarily()
+    private IEnumerator ActivateShotColliderMomentarily()    // ★追加：一瞬ONユーティリティ
     {
         if (shotHitCollider != null)
         {
@@ -288,28 +329,29 @@ public class PlayerController : MonoBehaviour
         isShooting = false;                                  // スイング終了
         RefreshClubVisual();                                 // 表示更新（非表示へ）
 
-        // ★追加：ここでpostHold後にFreeLookへ戻す（ぶれ防止の決定打）
+        // ターゲットロックを解除し、一定時間は再取得しない（ワープ/暴発防止）
+        if (aimDetector != null)
+            aimDetector.ReleaseLock(postShotReacquireCooldown); // ★追加
+
+        // カメラはpostHold後にFreeLookへ（ぶれ防止）
         if (holdAimUntilShotEnd)
             StartCoroutine(ReturnCameraAfterHold(postShotHoldSeconds));
         else
         {
             ApplyCameraPriority(aiming:false);
             SnapFreeLookOnce();
-            currentAimTarget = null;                         // 前回ターゲット拘束を解除
-            aimHasBaseline   = false;                        // 次回構えで基準取り直し
         }
 
-        // これで IsActionLocked() が false になり、移動・ジャンプが解禁される
-        // 例：Debug.Log("Shot End");
+        // 次回構えで基準取り直し
+        currentAimTarget = null;                             // ★追加
+        aimHasBaseline   = false;                            // ★追加
     }
 
-    private System.Collections.IEnumerator ReturnCameraAfterHold(float holdSec) // ★追加：保持後に戻す
+    private IEnumerator ReturnCameraAfterHold(float holdSec)
     {
-        yield return new WaitForSeconds(Mathf.Max(0f, holdSec)); // 少し待ってから
+        yield return new WaitForSeconds(Mathf.Max(0f, holdSec)); // 待機
         ApplyCameraPriority(aiming:false);                        // FreeLookへ
-        SnapFreeLookOnce();                                      // 向き合わせ
-        currentAimTarget = null;                                 // 前回ターゲット解除（ワープ防止）
-        aimHasBaseline   = false;                                // 基準も解除
+        SnapFreeLookOnce();                                      // 向き同期
     }
 
     // =======================
@@ -333,7 +375,7 @@ public class PlayerController : MonoBehaviour
 
     private bool IsActionLocked()                            // 行動ロック条件
     {
-        return isAiming || isShooting;                       // どちらか中はロック
+        return externalLock || isAiming || isShooting;       // ★変更：外部ロックも考慮
     }
 
     private void OnDrawGizmosSelected()                      // デバッグ可視化
@@ -344,29 +386,26 @@ public class PlayerController : MonoBehaviour
     }
 
     // =======================
-    // ★追加：Aiming用の処理（180°制限付き）
+    // Aiming処理（180°制限、押し出し無し・固定半径）
     // =======================
 
     private void EnterAimMode()                              // 構え突入時
     {
-        // ★確実切替：優先度でaimVCamへ
-        ApplyCameraPriority(aiming:true);
-        SnapAimVCamOnce();                                   // ★切替瞬間に一度だけ背後右へスナップ
+        ApplyCameraPriority(aiming:true);                    // aimVCamを上位に
+        SnapAimVCamOnce();                                   // 切替瞬間に一度だけ背後右へスナップ
 
-        // ★基準をリセット（最初にターゲットが確定した時点で決める）
-        aimHasBaseline = false;
-        aimOffsetDeg   = 0f;
+        aimHasBaseline = false;                              // 基準リセット
+        aimOffsetDeg   = 0f;                                 // 角度オフセット初期化
     }
 
-    private void AimOrbitUpdate()                            // 構え中の周回見せ方（180°制限）
+    private void AimOrbitUpdate()                            // 構え中ターゲット周回
     {
-        // ターゲットがいない場合：カメラの水平方向に体の向きを合わせておく（見た目安定）
+        // ターゲットがいない場合：カメラ前へ向けておく（見た目安定）
         if (currentAimTarget == null)
         {
             if (cameraFollowTarget)
             {
-                Vector3 flatForward = cameraFollowTarget.forward; // カメラ前
-                flatForward.y = 0f;                               // 水平成分のみ
+                Vector3 flatForward = cameraFollowTarget.forward; flatForward.y = 0f; // 水平成分
                 if (flatForward.sqrMagnitude > 0.0001f)
                 {
                     Quaternion toRot = Quaternion.LookRotation(flatForward);
@@ -376,44 +415,33 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        // ★基準ベクトル（ターゲット→プレイヤーの水平）を初回確定
+        // 基準ベクトル（ターゲット→自分の水平）を初回確定
         if (!aimHasBaseline)
         {
-            Vector3 baseDir = transform.position - currentAimTarget.position; // 目標→自分
-            baseDir.y = 0f;
-            if (baseDir.sqrMagnitude < 0.0001f) baseDir = transform.forward;  // 保険
-            aimBaseDirFlat = baseDir.normalized;                               // 正規化して保持
+            Vector3 baseDir = transform.position - currentAimTarget.position; baseDir.y = 0f;
+            if (baseDir.sqrMagnitude < 0.0001f) baseDir = transform.forward;
+            aimBaseDirFlat = baseDir.normalized;
             aimHasBaseline = true;
-            aimOffsetDeg   = 0f;                                               // 角オフセット初期化
+            aimOffsetDeg   = 0f;
         }
 
-        // 左スティックのX入力で角オフセットを加算（度/秒）
-        float turnX = inputVector.x; // -1〜1
+        // 入力で±回転（度/秒）→180°（±90°）に制限
+        float turnX = inputVector.x;
         if (Mathf.Abs(turnX) > 0.01f)
         {
-            aimOffsetDeg += turnX * orbitTurnSpeed * Time.deltaTime;          // 加算
-            aimOffsetDeg  = Mathf.Clamp(aimOffsetDeg, -orbitHalfSpanDeg, +orbitHalfSpanDeg); // ★180°制限（±90°）
+            aimOffsetDeg += turnX * orbitTurnSpeed * Time.deltaTime;
+            aimOffsetDeg  = Mathf.Clamp(aimOffsetDeg, -orbitHalfSpanDeg, +orbitHalfSpanDeg);
         }
 
-        // ★位置を自前で再計算（基準ベクトルを回転）
-        Vector3 center = currentAimTarget.position;                            // 回転中心
-        Vector3 dir    = Quaternion.AngleAxis(aimOffsetDeg, Vector3.up) * aimBaseDirFlat; // 回転後の方向
+        // 固定半径で回る（押し出し/引き寄せは一切しない）
+        Vector3 center = currentAimTarget.position;
+        Vector3 dir    = Quaternion.AngleAxis(aimOffsetDeg, Vector3.up) * aimBaseDirFlat;
+        Vector3 newPos = center + dir.normalized * orbitDistance;  // ★固定半径（ロック時距離）
+        newPos.y = transform.position.y;                            // 高さは現状維持
+        transform.position = newPos;                                // 位置を更新
 
-        // ★変更：半径の扱いを“外へ押すのみ”にする（ワープ防止）
-        Vector3 flat = transform.position - center;                            // 現在の水平差分
-        flat.y = 0f;                                                           // 水平のみ
-        float currentRadius = flat.magnitude;                                  // 現在の半径
-        float desiredRadius = orbitDistance;                                   // 望ましい半径（安全半径）
-        float useRadius = orbitOnlyPushOut ? Mathf.Max(currentRadius, desiredRadius) // 近ければ押し出す／遠ければ維持
-                                           : desiredRadius;                    // （引き寄せない）
-
-        Vector3 newPos = center + dir.normalized * (useRadius > 0.001f ? useRadius : desiredRadius); // 新しい位置
-        newPos.y = transform.position.y;                                       // 高さは現状維持（必要に応じて接地補正）
-        transform.position = newPos;                                           // 位置を更新
-
-        // 常にターゲットの方向を向く（見た目を綺麗に保つ）
-        Vector3 lookDir = center - transform.position;                         // ターゲットへの方向
-        lookDir.y = 0f;                                                        // 水平のみ
+        // 常にターゲット方向を向く
+        Vector3 lookDir = center - transform.position; lookDir.y = 0f;
         if (lookDir.sqrMagnitude > 0.0001f)
         {
             Quaternion toRot = Quaternion.LookRotation(lookDir);
@@ -421,16 +449,14 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    // =======================
-    // ★追加：カメラ切替ユーティリティ
-    // =======================
+    // ===== カメラ切替ユーティリティ =====
 
     private void ApplyCameraPriority(bool aiming)           // 優先度で確実に切替
     {
         if (useAimVCam && aimVCam != null)
         {
             aimVCam.Priority = aiming ? aimVCamPriorityAim : priorityInactive;
-            aimVCam.PreviousStateIsValid = false;           // 履歴破棄で“今の設定”に即スナップ
+            aimVCam.PreviousStateIsValid = false;           // 履歴破棄＝即スナップ
         }
         if (freeLook != null)
         {
@@ -443,34 +469,30 @@ public class PlayerController : MonoBehaviour
     {
         if (aimVCam == null) return;
         ConfigureAimVCam();                                 // 右肩オフセット反映
-        // 3rdPersonFollow/Transposer は Follow/LookAt の姿勢に追従するため、
-        // ここでは毎フレーム上書き不要。優先度切替＋スナップのみで安定させる。
+        // 以後は毎フレームいじらない（スピン/ブレ防止）
     }
 
     private void SnapFreeLookOnce()                         // FreeLookへ戻す時に一度だけYaw合わせ
     {
         if (freeLook == null) return;
         float yawDeg = Mathf.Atan2(transform.forward.x, transform.forward.z) * Mathf.Rad2Deg; // プレイヤーYaw
-        freeLook.m_XAxis.Value = yawDeg;                    // X軸を1回だけ合わせる（ぐるぐる防止）
-        // 高さ（Y）はFreeLookの現状値のままでOK
+        freeLook.m_XAxis.Value = yawDeg;                    // X軸だけ同期（ぐるぐる防止）
     }
 
     private void ConfigureAimVCam()                          // 右肩VCamの各種オフセットを適用
     {
         if (aimVCam == null) return;
 
-        // 3rdPersonFollow が付いていれば優先して使う（肩越し視点）
         var tpf = aimVCam.GetCinemachineComponent<Cinemachine3rdPersonFollow>();
         if (tpf != null)
         {
             tpf.CameraSide   = Mathf.Clamp01(aimCameraSide);               // 1=右肩
             tpf.ShoulderOffset = new Vector3(aimRightOffset, aimUpOffset, 0f);
             tpf.CameraDistance     = Mathf.Max(0.1f, aimBackDistance);
-            tpf.Damping      = new Vector3(0.05f, 0.05f, 0.1f);            // わずかに残す程度
+            tpf.Damping      = new Vector3(0.05f, 0.05f, 0.1f);
             return;
         }
 
-        // 無ければ Transposer で代用（FollowOffsetで右・上・後ろを作る）
         var transposer = aimVCam.GetCinemachineComponent<CinemachineTransposer>();
         if (transposer != null)
         {
@@ -479,77 +501,59 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    // =======================
-    // ★追加：Aiming連携用のAPI（AimDetectorから呼ばれる）
-    // =======================
-
-    public void SetCurrentAimTarget(Transform t)                   // AimDetectorが毎フレーム呼ぶ想定（null可）
+    // ===== ユーティリティ：自分の水平半径を自動計算 =====
+    private float ComputeMyHorizontalRadius()               // ★追加：自身の「水平半径」を推定
     {
-        // ターゲットが切り替わったら基準を取り直す
-        if (currentAimTarget != t)
+        float maxR = 0.25f;                                 // 最低目安
+        var cols = GetComponentsInChildren<Collider>();
+        for (int i = 0; i < cols.Length; i++)
         {
-            aimHasBaseline = false;                                // 次フレームで基準を再確定
-            aimOffsetDeg   = 0f;
+            var c = cols[i];
+            if (c == null) continue;
+            if (c.enabled == false) continue;
+            // ※ プレイヤーの自身のトリガーは基本含めてOK（めり込み判定には影響小）
+            Vector3 e = c.bounds.extents;                   // ワールド半サイズ
+            float r = Mathf.Sqrt(e.x * e.x + e.z * e.z);    // 水平半径 ≒ √(x^2+z^2)
+            if (r > maxR) maxR = r;
         }
-        currentAimTarget = t;                                      // 現在のターゲットを更新
+        return maxR;
     }
 
-    public void SetCurrentAimOrbitRadius(float r)                  // AimDetectorが毎フレーム呼ぶ想定
+    // ===== 公開アクセサ =====
+
+    public bool IsLofted()                                  // 現在Loftedかどうか返す
     {
-        orbitDistance = Mathf.Max(0.01f, r);                       // 0以下にならないようにクランプ
+        return currentShotType == ShotType.Lofted;          // 列挙型をそのまま利用
     }
 
-    // =======================
-    // 公開アクセサ
-    // =======================
-
-    public bool IsLofted()                                   // 現在Loftedかどうか返す
+    public bool IsAiming()                                  // ★追加：AimDetector から参照される
     {
-        return currentShotType == ShotType.Lofted;           // 列挙型をそのまま利用
+        return isAiming;                                    // 構え中かどうか
     }
 
-    public bool IsAiming()                                   // 現在構え中かどうか返す（AimDetector側で参照）
+    public void SetCurrentAimTarget(Transform t)            // ★追加：AimDetector（Proxy）連携用
     {
-        return isAiming;                                     // フラグをそのまま返す
+        currentAimTarget = t;                               // 周回中心を受け取る
     }
 
-    // =======================
-    // ★追加：構え可否（距離ゲート＋ターゲット存在）
-    // =======================
-    private bool CanEnterAim()                               // ターゲットが近くにないと構え不可
+    public void SetCurrentAimOrbitRadius(float r)           // ★追加：AimDetector（Proxy）連携用
     {
-        // AimDetector が割当済みなら、その現在ターゲットの有無と距離で判定
-        if (aimDetector != null)
+        orbitDistance = Mathf.Max(0.01f, r);                // 安全半径を受け取る
+    }
+
+    public void SetExternalActionLock(bool locked)
+    {
+        externalLock = locked;                              // ロック状態を更新
+
+        // ★追加：rbが未キャッシュならここで遅延取得（Awake前でも落ちない）
+        if (!rb) rb = GetComponent<Rigidbody>();
+
+        if (locked && rb)                                   // 水平速度を止める（rbがあるときだけ）
         {
-            var t = aimDetector.CurrentTarget;               // 現在の最寄りターゲット
-            if (t == null) return false;                     // いなければ構え不可
-
-            // 水平距離（XZ）だけ見る：上下差で誤判定しないため
-            float d = HorizontalDistanceXZ(transform.position, t.position); // ★追加
-            return d <= Mathf.Max(0.01f, aimEnterMaxDistance); // 許容距離内なら構えOK
+            Vector3 v = rb.velocity;
+            rb.velocity = new Vector3(0f, v.y, 0f);
         }
-        // AimDetector未割当なら、保険としてfalseにしておく方が安全
-        return false;                                        // 検出無しでの構えは不可
+        // 必要であれば Animator や UI のロック表示をここで切り替え可
     }
 
-    // ★追加：水平距離だけを計算する小ヘルパー
-    private float HorizontalDistanceXZ(Vector3 a, Vector3 b) // 
-    {
-        a.y = 0f; b.y = 0f;                                   // 高さ無視
-        return Vector3.Distance(a, b);                        // XZ平面距離
-    }
-    
-    // ① フィールド（好きなセクションの末尾でOK）
-    [Header("スコア")]       // ★追加：見出し
-    public int score = 0; // ★現在のスコア
-
-    public System.Action<int,int> OnScored;             // (得点, 合計)
-
-// ② メソッド（クラス内のどこでもOK）
-    public void AddScore(int points)                    // （HoleGoalから呼ばれる）
-    {
-        score += Mathf.Max(0, points);                         // マイナスは防止（必要なら許可に変えてOK）
-        Debug.Log($"[Score] {name} +{points}点 → 合計 {score}点"); // デバッグ
-        OnScored?.Invoke(points, score);                       // (任意)UI更新などに使えるイベント
-    }
 }

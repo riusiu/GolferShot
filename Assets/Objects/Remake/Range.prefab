@@ -216,9 +216,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 58333b54c4aed4e46b559f19a7b6e881, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  respawnPrefab: {fileID: 7527501740464676609}
-  spawnPointOverride: {fileID: 0}
-  useCurrentAsFallback: 1
+  respawnPrefab: {fileID: 7163962096565772623, guid: a44244ecf5ef4a84cbaaf12f934b7d2a,
+    type: 3}
   respawnOnDestroy: 0
   respawnDelaySeconds: 2
+  spawnPointOverride: {fileID: 0}
+  useCurrentAsFallback: 1
+  pointsGroup: {fileID: 0}
+  area: {fileID: 0}
+  clearanceRadius: 0.25
+  sampleTries: 12
   allowTeleportRecover: 0

@@ -23,7 +23,7 @@ public class Respawnable : MonoBehaviour
     [Header("ランダムスポーン設定")]
     public RandomSpawnPoints pointsGroup;           // 複数ポイントからランダム
     public RandomSpawnArea   area;                  // エリア（Box/Sphere）からランダム
-    public float clearanceRadius = 0.25f;           // 近接クリアランス（衝突しない半径）
+    public float clearanceRadius = 1f;           // 近接クリアランス（衝突しない半径）
     public int sampleTries = 12;                    // サンプリング試行回数（失敗時はフォールバック）
 
     [Header("テレポート復帰（プレイヤー用）")]
